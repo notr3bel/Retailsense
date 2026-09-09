@@ -3,7 +3,13 @@ Pipeline Page - RetailSense-AI BI Dashboard
 MLOps Pipeline Status, Data Quality Reports, Processing Gauges & Execution Timeline.
 """
 
+import sys
 import os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import pandas as pd
 import streamlit as st
 from dashboard.utils import load_all_datasets, load_pipeline_reports, render_download_button

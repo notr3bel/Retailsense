@@ -88,8 +88,9 @@ def plot_monthly_orders(df: pd.DataFrame) -> go.Figure:
     if df is None or df.empty:
         return go.Figure()
 
-    if "year_month" in df.columns and "invoice" in df.columns:
-        df_orders = df.groupby("year_month")["invoice"].nunique().reset_index()
+    inv_col = "invoice_no" if "invoice_no" in df.columns else ("invoice" if "invoice" in df.columns else None)
+    if "year_month" in df.columns and inv_col:
+        df_orders = df.groupby("year_month")[inv_col].nunique().reset_index()
         df_orders.columns = ["period", "orders"]
     elif "year" in df.columns and "total_orders" in df.columns:
         df_orders = df.copy()
@@ -478,11 +479,12 @@ def plot_repeat_vs_new(df: pd.DataFrame) -> go.Figure:
     if df is None or df.empty:
         return go.Figure()
 
-    orders_col = "total_orders" if "total_orders" in df.columns else "invoice"
+    inv_col = "invoice_no" if "invoice_no" in df.columns else ("invoice" if "invoice" in df.columns else None)
+    orders_col = "total_orders" if "total_orders" in df.columns else inv_col
     cust_col = "customer_id" if "customer_id" in df.columns else "CustomerID"
 
-    if orders_col == "invoice":
-        df_orders = df.groupby(cust_col)["invoice"].nunique().reset_index()
+    if orders_col in ["invoice_no", "invoice"]:
+        df_orders = df.groupby(cust_col)[orders_col].nunique().reset_index()
         df_orders.columns = ["customer_id", "orders"]
     else:
         df_orders = df[[cust_col, orders_col]].copy()
@@ -514,10 +516,11 @@ def plot_avg_basket_size(df: pd.DataFrame) -> go.Figure:
     if df is None or df.empty:
         return go.Figure()
 
+    inv_col = "invoice_no" if "invoice_no" in df.columns else ("invoice" if "invoice" in df.columns else None)
     if "average_items_per_order" in df.columns:
         basket_data = df["average_items_per_order"]
-    elif "quantity" in df.columns and "invoice" in df.columns:
-        basket_data = df.groupby("invoice")["quantity"].sum()
+    elif "quantity" in df.columns and inv_col:
+        basket_data = df.groupby(inv_col)["quantity"].sum()
     else:
         return go.Figure()
 
@@ -540,12 +543,13 @@ def plot_rfm_summary(df: pd.DataFrame) -> go.Figure:
         return go.Figure()
 
     spent_col = "total_spent" if "total_spent" in df.columns else "total_price"
-    orders_col = "total_orders" if "total_orders" in df.columns else "invoice"
+    inv_col = "invoice_no" if "invoice_no" in df.columns else ("invoice" if "invoice" in df.columns else None)
+    orders_col = "total_orders" if "total_orders" in df.columns else inv_col
 
-    if orders_col == "invoice":
+    if orders_col in ["invoice_no", "invoice"]:
         df_rfm = df.groupby("customer_id").agg(
-            frequency=("invoice", "nunique"),
-            monetary=("total_price", "sum")
+            frequency=(orders_col, "nunique"),
+            monetary=(spent_col, "sum")
         ).reset_index()
     else:
         df_rfm = df[["customer_id", orders_col, spent_col]].copy()
@@ -636,10 +640,11 @@ def plot_orders_by_country(df: pd.DataFrame, top_n: int = 10) -> go.Figure:
     if df is None or "country" not in df.columns:
         return go.Figure()
 
-    ord_col = "total_orders" if "total_orders" in df.columns else "invoice"
-    if ord_col == "invoice":
-        df_c = df.groupby("country")["invoice"].nunique().reset_index().sort_values("invoice", ascending=False).head(top_n)
-        y_col = "invoice"
+    inv_col = "invoice_no" if "invoice_no" in df.columns else ("invoice" if "invoice" in df.columns else None)
+    ord_col = "total_orders" if "total_orders" in df.columns else inv_col
+    if ord_col in ["invoice_no", "invoice"]:
+        df_c = df.groupby("country")[ord_col].nunique().reset_index().sort_values(ord_col, ascending=False).head(top_n)
+        y_col = ord_col
     else:
         df_c = df.groupby("country")["total_orders"].sum().reset_index().sort_values("total_orders", ascending=False).head(top_n)
         y_col = "total_orders"

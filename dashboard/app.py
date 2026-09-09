@@ -3,6 +3,14 @@ RetailSense-AI Streamlit Dashboard Main Entry Point.
 Production-Quality Multi-Page BI & MLOps Intelligence System.
 """
 
+import sys
+import os
+
+# Add project root directory to sys.path for robust module resolution
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import streamlit as st
 from dashboard.utils import load_all_datasets, load_pipeline_reports, get_filtered_metrics
 from dashboard.components.styles import apply_custom_styles

@@ -3,6 +3,13 @@ Customer Page - RetailSense-AI BI Dashboard
 Customer Lifetime Value, RFM Segmentation, Repeat vs. One-Time Buyers & Basket Metrics.
 """
 
+import sys
+import os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import streamlit as st
 from dashboard.utils import load_all_datasets, load_pipeline_reports, apply_global_filters, render_download_button
 from dashboard.components.styles import apply_custom_styles

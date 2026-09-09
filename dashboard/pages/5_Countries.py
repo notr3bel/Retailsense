@@ -3,6 +3,13 @@ Country Page - RetailSense-AI BI Dashboard
 Geographical Revenue Intelligence, International Order Volumes & Country Market Rankings.
 """
 
+import sys
+import os
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
 import streamlit as st
 import pandas as pd
 from dashboard.utils import load_all_datasets, load_pipeline_reports, apply_global_filters, render_download_button

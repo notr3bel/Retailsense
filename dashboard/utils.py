@@ -128,9 +128,10 @@ def get_filtered_metrics(datasets: Dict[str, pd.DataFrame], filters: Dict[str, A
         df_filtered = apply_global_filters(df_proc, filters)
         if not df_filtered.empty:
             total_rev = df_filtered["total_price"].sum()
-            total_orders = df_filtered["invoice"].nunique()
-            total_customers = df_filtered["customer_id"].nunique()
-            total_products = df_filtered["stock_code"].nunique()
+            inv_col = "invoice_no" if "invoice_no" in df_filtered.columns else ("invoice" if "invoice" in df_filtered.columns else None)
+            total_orders = df_filtered[inv_col].nunique() if inv_col else 0
+            total_customers = df_filtered["customer_id"].nunique() if "customer_id" in df_filtered.columns else 0
+            total_products = df_filtered["stock_code"].nunique() if "stock_code" in df_filtered.columns else 0
             aov = total_rev / total_orders if total_orders > 0 else 0.0
             total_countries = df_filtered["country"].nunique()
             return {

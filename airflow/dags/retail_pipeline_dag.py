@@ -29,7 +29,7 @@ from database.load_postgres import load_data_warehouse
 logger = setup_logger("Airflow_RetailPipeline")
 
 # ============================================================================
-# Airflow Import Handling (Graceful fallback for standalone Windows execution)
+# Airflow Import Handling (Graceful fallback for standalone execution)
 # ============================================================================
 try:
     from airflow import DAG
@@ -75,16 +75,40 @@ except (ImportError, Exception):
 
 
 # ============================================================================
+# Production Failure Notification Callback
+# ============================================================================
+
+def on_task_failure_callback(context: Dict[str, Any]) -> None:
+    """
+    Production Failure Callback Handler.
+    Workflow: Task Failure -> Retries Exhausted (2 retries) -> Error Log Entry -> Email Alert.
+    """
+    task_instance = context.get("task_instance")
+    exception = context.get("exception")
+    execution_date = context.get("execution_date")
+
+    task_id = task_instance.task_id if task_instance else "unknown_task"
+    error_msg = f"Task [{task_id}] FAILED on {execution_date}. Exception: {exception}"
+
+    logger.error("=========================================================================")
+    logger.error(f"🚨 PRODUCTION FAILURE ALERT: {error_msg}")
+    logger.error("Generating error log entry and dispatching email notification to ops team...")
+    logger.error("=========================================================================")
+
+
+# ============================================================================
 # DAG Default Arguments & Definition
 # ============================================================================
 default_args = {
     "owner": "retailsense",
     "depends_on_past": False,
     "start_date": datetime(2026, 1, 1),
-    "email_on_failure": False,
+    "email": ["alerts@retailsense.ai"],
+    "email_on_failure": True,
     "email_on_retry": False,
     "retries": 2,
     "retry_delay": timedelta(minutes=5),
+    "on_failure_callback": on_task_failure_callback,
 }
 
 
@@ -175,6 +199,7 @@ def task_pipeline_metadata(
     end_time = datetime.now().astimezone().isoformat()
 
     metadata = {
+        "pipeline_version": "1.0.0",
         "pipeline_run_id": run_id,
         "execution_date": execution_date,
         "start_time": start_time,
@@ -204,7 +229,7 @@ def task_pipeline_metadata(
     with open(output_metadata_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=4)
 
-    logger.info(f"Task 7 Complete: Saved pipeline metadata to {output_metadata_path}.")
+    logger.info(f"Task 7 Complete: Saved pipeline metadata v1.0.0 to {output_metadata_path}.")
     return metadata
 
 

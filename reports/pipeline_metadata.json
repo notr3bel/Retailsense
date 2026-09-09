@@ -1,8 +1,9 @@
 {
-    "pipeline_run_id": "retail_run_1788963242",
-    "execution_date": "2026-09-09T19:44:02.939449+05:30",
-    "start_time": "2026-09-09T19:44:02.939467+05:30",
-    "end_time": "2026-09-09T19:44:31.976963+05:30",
+    "pipeline_version": "1.0.0",
+    "pipeline_run_id": "retail_run_1788963944",
+    "execution_date": "2026-09-09T19:55:44.373104+05:30",
+    "start_time": "2026-09-09T19:55:44.373122+05:30",
+    "end_time": "2026-09-09T19:56:15.244509+05:30",
     "duration_seconds": 0.0,
     "status": "SUCCESS",
     "input_files": [

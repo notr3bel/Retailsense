@@ -42,9 +42,10 @@
 - ✅ **Airflow DAG**: 8-stage scheduled orchestration workflow with execution logging.
 - ✅ **Dashboard**: Multi-page Streamlit BI dashboard with 15+ interactive Plotly charts.
 - ✅ **Customer Churn Label Generation**: Automated 90-day inactivity churn labeling & dataset creation (`data/ml/customer_churn_dataset.csv`).
+- ✅ **Customer Feature Engineering**: 28 engineered features across Profile, Monetary, Order, Recency, Product, Temporal & Value Segment (`data/ml/customer_features.csv`).
 
 ### In Progress (`v1.2`)
-- 🚧 **Machine Learning Pipeline**: XGBoost Churn Model Training, Evaluation & Feature Engineering.
+- 🚧 **Machine Learning Pipeline**: XGBoost Churn Model Training, Hyperparameter Tuning & Model Evaluation.
 
 ### Planned (`v1.3+`)
 - 📌 **MLflow**: Model experiment tracking and model registry.

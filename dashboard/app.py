@@ -109,6 +109,15 @@ with nav_col3:
         """,
         unsafe_allow_html=True
     )
+    st.markdown(
+        """
+        <div class="kpi-card" style="margin-top: 16px;">
+            <h3>🤖 7. Machine Learning</h3>
+            <p style="color: #94a3b8; font-size: 0.9rem;">Customer churn labeling (90d inactivity rule), 28 engineered ML features, value segmentation distributions, and feature store data preview.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.info("👈 Use the left sidebar to navigate between pages and apply global filters across Country, Year, and Month.")

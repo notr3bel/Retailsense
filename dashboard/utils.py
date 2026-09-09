@@ -84,6 +84,49 @@ def load_pipeline_reports() -> Tuple[Dict[str, Any], Dict[str, Any]]:
     return metadata, quality
 
 
+@st.cache_data(ttl=300)
+def load_ml_datasets() -> Dict[str, Any]:
+    """
+    Loads customer churn dataset, churn report, customer feature dataset, and feature report.
+    
+    Returns:
+        Dict[str, Any]: Dict containing churn_df, churn_report, features_df, and feat_report.
+    """
+    ml_data = {}
+    churn_csv = "data/ml/customer_churn_dataset.csv"
+    churn_json = "reports/churn_label_report.json"
+    feat_csv = "data/ml/customer_features.csv"
+    feat_json = "reports/feature_engineering_report.json"
+
+    if os.path.exists(churn_csv):
+        try:
+            ml_data["churn_df"] = pd.read_csv(churn_csv)
+        except Exception:
+            pass
+
+    if os.path.exists(churn_json):
+        try:
+            with open(churn_json, "r", encoding="utf-8") as f:
+                ml_data["churn_report"] = json.load(f)
+        except Exception:
+            pass
+
+    if os.path.exists(feat_csv):
+        try:
+            ml_data["features_df"] = pd.read_csv(feat_csv)
+        except Exception:
+            pass
+
+    if os.path.exists(feat_json):
+        try:
+            with open(feat_json, "r", encoding="utf-8") as f:
+                ml_data["feat_report"] = json.load(f)
+        except Exception:
+            pass
+
+    return ml_data
+
+
 def apply_global_filters(df: pd.DataFrame, filters: Dict[str, Any]) -> pd.DataFrame:
     """
     Applies global sidebar filters (Country, Years, Months) to a DataFrame.

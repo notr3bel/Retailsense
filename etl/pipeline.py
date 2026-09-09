@@ -12,6 +12,7 @@ from etl.transform import transform_datasets
 from etl.load import load_data
 from etl.gold import generate_gold_layer
 from ml.churn_label import generate_churn_labels
+from ml.feature_engineering import generate_customer_features
 
 logger = setup_logger("ETL_Pipeline")
 
@@ -59,9 +60,16 @@ def run_pipeline() -> Dict[str, Any]:
         output_report_path="reports/churn_label_report.json"
     )
 
+    # 7. GENERATE CUSTOMER FEATURES DATASET (PHASE 4.2 ML FEATURE ENGINEERING)
+    features_df, feature_report = generate_customer_features(
+        input_data=df_cleaned,
+        output_csv_path="data/ml/customer_features.csv",
+        output_report_path="reports/feature_engineering_report.json"
+    )
+
     execution_time = round(time.time() - start_time, 2)
 
-    # 7. GENERATE DATA QUALITY REPORTS
+    # 8. GENERATE DATA QUALITY REPORTS
     json_report_path, csv_report_path = generate_data_quality_report(
         raw_df=df_merged,
         transform_stats=transform_stats,
@@ -83,6 +91,8 @@ def run_pipeline() -> Dict[str, Any]:
         "gold_files": gold_files,
         "churn_dataset": "data/ml/customer_churn_dataset.csv",
         "churn_report": "reports/churn_label_report.json",
+        "customer_features": "data/ml/customer_features.csv",
+        "feature_report": "reports/feature_engineering_report.json",
         "json_report": json_report_path,
         "csv_report": csv_report_path,
     }
@@ -97,6 +107,7 @@ def run_pipeline() -> Dict[str, Any]:
     print(f"  * Missing values handled : {missing_handled:,}")
     print(f"  * Gold Layer Datasets    : {len(gold_files)} generated in data/gold/")
     print(f"  * Churn Target Dataset   : {len(churn_df):,} customers (Churn Rate: {churn_report['churn_rate_pct']})")
+    print(f"  * ML Feature Dataset     : {len(features_df):,} customers ({len(feature_report['feature_names'])} features in data/ml/)")
     print(f"  * Execution time         : {execution_time} seconds")
     print(f"  * JSON Quality Report    : {json_report_path}")
     print(f"  * CSV Quality Report     : {csv_report_path}")

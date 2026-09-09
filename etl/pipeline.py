@@ -11,6 +11,7 @@ from etl.validate import validate_datasets, generate_data_quality_report
 from etl.transform import transform_datasets
 from etl.load import load_data
 from etl.gold import generate_gold_layer
+from ml.churn_label import generate_churn_labels
 
 logger = setup_logger("ETL_Pipeline")
 
@@ -51,9 +52,16 @@ def run_pipeline() -> Dict[str, Any]:
     # 5. GENERATE GOLD DATA LAYER
     gold_files = generate_gold_layer(processed_df_or_path=df_cleaned)
 
+    # 6. GENERATE CUSTOMER CHURN DATASET (PHASE 4.1 ML TARGET LABELS)
+    churn_df, churn_report = generate_churn_labels(
+        input_data=df_cleaned,
+        output_csv_path="data/ml/customer_churn_dataset.csv",
+        output_report_path="reports/churn_label_report.json"
+    )
+
     execution_time = round(time.time() - start_time, 2)
 
-    # 6. GENERATE DATA QUALITY REPORTS
+    # 7. GENERATE DATA QUALITY REPORTS
     json_report_path, csv_report_path = generate_data_quality_report(
         raw_df=df_merged,
         transform_stats=transform_stats,
@@ -73,6 +81,8 @@ def run_pipeline() -> Dict[str, Any]:
         "staging_file": staging_file,
         "processed_file": processed_file,
         "gold_files": gold_files,
+        "churn_dataset": "data/ml/customer_churn_dataset.csv",
+        "churn_report": "reports/churn_label_report.json",
         "json_report": json_report_path,
         "csv_report": csv_report_path,
     }
@@ -86,6 +96,7 @@ def run_pipeline() -> Dict[str, Any]:
     print(f"  * Rows removed           : {rows_removed:,}")
     print(f"  * Missing values handled : {missing_handled:,}")
     print(f"  * Gold Layer Datasets    : {len(gold_files)} generated in data/gold/")
+    print(f"  * Churn Target Dataset   : {len(churn_df):,} customers (Churn Rate: {churn_report['churn_rate_pct']})")
     print(f"  * Execution time         : {execution_time} seconds")
     print(f"  * JSON Quality Report    : {json_report_path}")
     print(f"  * CSV Quality Report     : {csv_report_path}")

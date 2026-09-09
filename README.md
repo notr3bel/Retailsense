@@ -34,18 +34,19 @@
 
 ## 🚧 Project Status
 
-**Current Version**: `v1.0`
+**Current Version**: `v1.1`
 
-### Completed Phase (`v1.0`)
+### Completed Phase (`v1.0` & `v1.1`)
 - ✅ **ETL Pipeline**: Automated multi-source extraction, cleaning, and schema normalization.
 - ✅ **Data Warehouse**: PostgreSQL Star Schema DW with relational facts and dimension tables.
 - ✅ **Airflow DAG**: 8-stage scheduled orchestration workflow with execution logging.
 - ✅ **Dashboard**: Multi-page Streamlit BI dashboard with 15+ interactive Plotly charts.
+- ✅ **Customer Churn Label Generation**: Automated 90-day inactivity churn labeling & dataset creation (`data/ml/customer_churn_dataset.csv`).
 
-### In Progress (`v1.1`)
-- 🚧 **Machine Learning Pipeline**: Customer Churn Prediction model development.
+### In Progress (`v1.2`)
+- 🚧 **Machine Learning Pipeline**: XGBoost Churn Model Training, Evaluation & Feature Engineering.
 
-### Planned (`v1.2+`)
+### Planned (`v1.3+`)
 - 📌 **MLflow**: Model experiment tracking and model registry.
 - 📌 **FastAPI**: RESTful API endpoints for real-time model predictions.
 - 📌 **Docker**: Containerization with Docker Compose.
@@ -414,18 +415,19 @@ airflow webserver -p 8080
 
 ## 🛣️ Future Roadmap
 
-### Version 1.0 (Completed)
+### Version 1.0 & 1.1 (Completed)
 - [x] Multi-source raw data extraction (Excel & CSV)
 - [x] Automated data validation & data quality report generation
 - [x] Relational Star Schema Data Warehouse (PostgreSQL / SQLite)
 - [x] Gold Analytics Data Layer generation
 - [x] Apache Airflow 8-task daily DAG orchestration
 - [x] Multi-Page Streamlit BI Dashboard with Plotly charts & global filters
+- [x] **Phase 4.1**: Customer Churn Dataset & Binary Label Generation (`90`-day inactivity rule)
 
-### Version 1.1 (In Progress)
+### Version 1.2 (In Progress)
 - [ ] Customer Churn Prediction Machine Learning Model (XGBoost / Scikit-Learn)
 
-### Version 1.2 (Planned)
+### Version 1.3 (Planned)
 - [ ] Experiment Tracking & Model Registry with **MLflow**
 
 ### Version 1.3 (Planned)

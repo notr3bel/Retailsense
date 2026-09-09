@@ -1,0 +1,9 @@
+{
+    "total_customers": 5878,
+    "active_customers": 2889,
+    "churned_customers": 2989,
+    "churn_rate": 0.5085,
+    "churn_rate_pct": "50.85%",
+    "churn_threshold_days": 90,
+    "generation_timestamp": "2026-09-09T21:03:55.920078+05:30"
+}

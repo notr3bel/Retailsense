@@ -218,6 +218,8 @@ def task_pipeline_metadata(
             "data/gold/country_summary.csv",
             "data/gold/monthly_sales.csv",
             "data/gold/sales_summary.csv",
+            "data/ml/customer_churn_dataset.csv",
+            "reports/churn_label_report.json",
             "reports/data_quality_report.json",
             "reports/data_quality_report.csv"
         ],

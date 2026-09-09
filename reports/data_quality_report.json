@@ -1,0 +1,20 @@
+{
+    "total_rows_before_cleaning": 1609280,
+    "total_rows_after_cleaning": 1172117,
+    "duplicate_rows_removed": 39179,
+    "missing_values_per_column": {
+        "invoice_no": 0,
+        "stock_code": 0,
+        "description": 5836,
+        "quantity": 0,
+        "invoice_date": 0,
+        "unit_price": 0,
+        "customer_id": 378087,
+        "country": 0
+    },
+    "cancelled_orders_removed": 28782,
+    "invalid_quantities_removed": 0,
+    "invalid_prices_removed": 110,
+    "processing_timestamp": "2026-09-09T19:44:02.593449+05:30",
+    "execution_time_seconds": 0.0
+}

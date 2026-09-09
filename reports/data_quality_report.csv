@@ -1,0 +1,10 @@
+column_name,data_type,missing_count,missing_percentage
+invoice_no,object,0,0.0
+stock_code,object,0,0.0
+description,object,5836,0.36
+quantity,int64,0,0.0
+invoice_date,datetime64[us],0,0.0
+unit_price,float64,0,0.0
+customer_id,float64,378087,23.49
+country,str,0,0.0
+invoice_no_str,str,0,0.0

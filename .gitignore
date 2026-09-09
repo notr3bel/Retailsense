@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data & Models (Preserve directory structure via .gitkeep)
+data/raw/*
+!data/raw/.gitkeep
+data/staging/*
+!data/staging/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/gold/*
+!data/gold/.gitkeep
+models/*.pkl
+models/*.joblib
+models/*.onnx
+models/*.h5
+!models/.gitkeep
+
+# Database Files
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+
+# Airflow
+airflow/logs/*
+!airflow/logs/.gitkeep
+airflow/airflow.db
+airflow/airflow.cfg
+airflow/airflow-webserver.pid
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Streamlit
+.streamlit/
+
+# Docker
+.docker/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Pytest / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs & OS Files
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,26 @@
+{
+    "pipeline_run_id": "retail_run_1788963242",
+    "execution_date": "2026-09-09T19:44:02.939449+05:30",
+    "start_time": "2026-09-09T19:44:02.939467+05:30",
+    "end_time": "2026-09-09T19:44:31.976963+05:30",
+    "duration_seconds": 0.0,
+    "status": "SUCCESS",
+    "input_files": [
+        "data/raw/Online Retail.xlsx",
+        "data/raw/online_retail_II.csv"
+    ],
+    "output_files": [
+        "data/staging/cleaned_data.csv",
+        "data/processed/final_dataset.csv",
+        "data/gold/customers.csv",
+        "data/gold/products.csv",
+        "data/gold/country_summary.csv",
+        "data/gold/monthly_sales.csv",
+        "data/gold/sales_summary.csv",
+        "reports/data_quality_report.json",
+        "reports/data_quality_report.csv"
+    ],
+    "rows_processed": 1609280,
+    "rows_removed": 437163,
+    "rows_loaded": 1172117
+}

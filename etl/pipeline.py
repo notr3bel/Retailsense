@@ -13,6 +13,7 @@ from etl.load import load_data
 from etl.gold import generate_gold_layer
 from ml.churn_label import generate_churn_labels
 from ml.feature_engineering import generate_customer_features
+from ml.train import run_training_pipeline
 
 logger = setup_logger("ETL_Pipeline")
 
@@ -67,9 +68,17 @@ def run_pipeline() -> Dict[str, Any]:
         output_report_path="reports/feature_engineering_report.json"
     )
 
+    # 8. TRAIN & EVALUATE MACHINE LEARNING MODELS (PHASE 4.3 ML TRAINING)
+    ml_summary = run_training_pipeline(
+        features_path="data/ml/customer_features.csv",
+        churn_path="data/ml/customer_churn_dataset.csv",
+        models_dir="models",
+        reports_dir="reports"
+    )
+
     execution_time = round(time.time() - start_time, 2)
 
-    # 8. GENERATE DATA QUALITY REPORTS
+    # 9. GENERATE DATA QUALITY REPORTS
     json_report_path, csv_report_path = generate_data_quality_report(
         raw_df=df_merged,
         transform_stats=transform_stats,
@@ -93,13 +102,17 @@ def run_pipeline() -> Dict[str, Any]:
         "churn_report": "reports/churn_label_report.json",
         "customer_features": "data/ml/customer_features.csv",
         "feature_report": "reports/feature_engineering_report.json",
+        "best_model_name": ml_summary["best_model_name"],
+        "best_model_path": ml_summary["best_model_path"],
+        "model_metrics_csv": ml_summary["csv_metrics_path"],
+        "model_evaluation_json": ml_summary["json_eval_path"],
         "json_report": json_report_path,
         "csv_report": csv_report_path,
     }
 
     # Print summary output
     print("\n==================================================")
-    print("RetailSense-AI ETL Pipeline Execution Summary")
+    print("RetailSense-AI ETL & ML Pipeline Execution Summary")
     print("==================================================")
     print(f"  * Rows loaded            : {rows_loaded:,}")
     print(f"  * Final rows processed   : {final_rows:,}")
@@ -108,6 +121,8 @@ def run_pipeline() -> Dict[str, Any]:
     print(f"  * Gold Layer Datasets    : {len(gold_files)} generated in data/gold/")
     print(f"  * Churn Target Dataset   : {len(churn_df):,} customers (Churn Rate: {churn_report['churn_rate_pct']})")
     print(f"  * ML Feature Dataset     : {len(features_df):,} customers ({len(feature_report['feature_names'])} features in data/ml/)")
+    print(f"  * Best ML Model Selected : {ml_summary['best_model_name']} (ROC_AUC: {ml_summary['best_roc_auc']})")
+    print(f"  * Saved Model Artifact   : {ml_summary['best_model_path']}")
     print(f"  * Execution time         : {execution_time} seconds")
     print(f"  * JSON Quality Report    : {json_report_path}")
     print(f"  * CSV Quality Report     : {csv_report_path}")

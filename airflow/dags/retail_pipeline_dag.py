@@ -220,8 +220,11 @@ def task_pipeline_metadata(
             "data/gold/sales_summary.csv",
             "data/ml/customer_churn_dataset.csv",
             "data/ml/customer_features.csv",
+            "models/best_model.pkl",
             "reports/churn_label_report.json",
             "reports/feature_engineering_report.json",
+            "reports/model_metrics.csv",
+            "reports/model_evaluation.json",
             "reports/data_quality_report.json",
             "reports/data_quality_report.csv"
         ],

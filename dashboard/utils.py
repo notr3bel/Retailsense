@@ -127,6 +127,36 @@ def load_ml_datasets() -> Dict[str, Any]:
     return ml_data
 
 
+@st.cache_data(ttl=300)
+def load_model_evaluation_reports() -> Tuple[Optional[pd.DataFrame], Dict[str, Any]]:
+    """
+    Loads ML model evaluation metrics CSV and evaluation summary JSON.
+    
+    Returns:
+        Tuple[Optional[pd.DataFrame], Dict[str, Any]]: (model_metrics_df, model_eval_dict)
+    """
+    metrics_path = "reports/model_metrics.csv"
+    eval_path = "reports/model_evaluation.json"
+
+    metrics_df = None
+    eval_dict = {}
+
+    if os.path.exists(metrics_path):
+        try:
+            metrics_df = pd.read_csv(metrics_path)
+        except Exception:
+            metrics_df = None
+
+    if os.path.exists(eval_path):
+        try:
+            with open(eval_path, "r", encoding="utf-8") as f:
+                eval_dict = json.load(f)
+        except Exception:
+            eval_dict = {}
+
+    return metrics_df, eval_dict
+
+
 def apply_global_filters(df: pd.DataFrame, filters: Dict[str, Any]) -> pd.DataFrame:
     """
     Applies global sidebar filters (Country, Years, Months) to a DataFrame.

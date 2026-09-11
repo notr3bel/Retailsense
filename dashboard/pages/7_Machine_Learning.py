@@ -95,10 +95,23 @@ if not best_metrics and metrics_df is not None and not metrics_df.empty:
         "roc_auc": top_row["ROC_AUC"]
     }
 
+def check_api_status() -> bool:
+    try:
+        import urllib.request
+        req = urllib.request.Request("http://127.0.0.1:8000/health", headers={"User-Agent": "StreamlitDashboard"})
+        with urllib.request.urlopen(req, timeout=1.0) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
+
+api_online = check_api_status()
+api_status_str = "🟢 FastAPI Server Online (http://127.0.0.1:8000)" if api_online else "⚪ FastAPI Server Offline (Launch: `uvicorn api.main:app --reload`)"
+
 # Champion Highlight Banner & Target Leakage Notice
 st.info(
     f"🥇 **Selected Champion Model:** `{best_model_name}` — Chosen based on highest test **ROC AUC**.\n\n"
     f"🧬 **MLflow Champion Run ID:** `{champion_run_id}` | **Experiment:** `RetailSense-Churn-Prediction`\n\n"
+    f"⚡ **Model Serving API Status:** `{api_status_str}`\n\n"
     f"🛡️ **Target Leakage Safeguard:** `recency_days` was excluded from training inputs because churn was defined as `(recency_days >= 90)`."
 )
 

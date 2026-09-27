@@ -103,8 +103,8 @@ with dq_col1:
             "Invalid Unit Prices Filtered (<=0)"
         ],
         "Value": [
-            f"{quality.get('total_rows_before', 0):,}",
-            f"{quality.get('total_rows_after', 0):,}",
+            f"{quality.get('total_rows_before_cleaning', 0):,}",
+            f"{quality.get('total_rows_after_cleaning', 0):,}",
             f"{quality.get('duplicate_rows_removed', 0):,}",
             f"{quality.get('cancelled_orders_removed', 0):,}",
             f"{quality.get('invalid_quantities_removed', 0):,}",

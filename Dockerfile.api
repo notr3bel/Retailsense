@@ -1,0 +1,39 @@
+# ============================================================================
+# Dockerfile.api — RetailSense-AI FastAPI Model Serving Image
+# ============================================================================
+
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+# Install system dependencies (compiler & postgres client libraries)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install API requirements
+COPY requirements-api.txt .
+RUN pip install --upgrade pip && pip install -r requirements-api.txt
+
+# Copy required application modules and runtime artifacts
+COPY api/ ./api/
+COPY etl/ ./etl/
+COPY models/ ./models/
+COPY reports/ ./reports/
+
+# Expose FastAPI service port
+EXPOSE 8000
+
+# Health check calling /health endpoint
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+# Start production server with Uvicorn (no --reload)
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

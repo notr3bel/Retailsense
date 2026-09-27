@@ -1,0 +1,67 @@
+
+services:
+  # 1. PostgreSQL Data Warehouse Service
+  postgres:
+    image: postgres:15-alpine
+    container_name: retailsense-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-retailsense_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-retailsense_dev_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-retailsense_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. FastAPI Model Serving Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: retailsense-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-retailsense_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-retailsense_dev_pass}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. Streamlit BI Dashboard Service
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: retailsense-dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data/processed:/app/data/processed:ro
+    environment:
+      API_BASE_URL: http://api:8000
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-retailsense_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-retailsense_dev_pass}
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    external: true
+    name: docker_postgres_data

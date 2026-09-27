@@ -49,11 +49,35 @@ churn_report = ml_data.get("churn_report", {})
 features_df = ml_data.get("features_df")
 feat_report = ml_data.get("feat_report", {})
 
-# Apply Global Filters to Features if Country is selected
+# Apply only filters that are meaningful for the customer-level ML feature store.
+# customer_features.csv contains country, but does not contain transaction-level
+# year/month fields. Therefore Year and Month filters are intentionally not applied.
 if features_df is not None and not features_df.empty:
-    filtered_features = apply_global_filters(features_df, filters)
+    filtered_features = features_df.copy()
+
+    if (
+        filters.get("country")
+        and filters["country"] != "All Countries"
+        and "country" in filtered_features.columns
+    ):
+        filtered_features = filtered_features[
+            filtered_features["country"] == filters["country"]
+        ]
 else:
     filtered_features = pd.DataFrame()
+if (
+    filters.get("years") != sorted(
+        datasets["processed"]["year"].dropna().astype(int).unique().tolist()
+    )
+    or filters.get("months") != sorted(
+        datasets["processed"]["month"].dropna().astype(int).unique().tolist()
+    )
+):
+    st.info(
+        "ℹ️ Year and Month filters are not applied to ML customer profiles. "
+        "ML features are generated at customer level across the complete feature-engineering period. "
+        "Country filtering is applied."
+    )
 
 # Top Export Bar
 top_col1, top_col2, top_col3, top_col4 = st.columns([2, 1, 1, 1])
@@ -63,7 +87,7 @@ with top_col1:
     st.write(f"Displaying **{num_c:,} customer profiles** with **{num_f} engineered ML features**.")
 with top_col2:
     if features_df is not None and not features_df.empty:
-        render_download_button(features_df, "customer_features.csv", "📥 Export Features")
+        render_download_button(filtered_features, "customer_features.csv", "📥 Export Features")
 with top_col3:
     if churn_df is not None and not churn_df.empty:
         render_download_button(churn_df, "customer_churn_dataset.csv", "📥 Export Churn CSV")
@@ -98,14 +122,16 @@ if not best_metrics and metrics_df is not None and not metrics_df.empty:
 def check_api_status() -> bool:
     try:
         import urllib.request
-        req = urllib.request.Request("http://127.0.0.1:8000/health", headers={"User-Agent": "StreamlitDashboard"})
+        base_url = os.getenv("API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+        req = urllib.request.Request(f"{base_url}/health", headers={"User-Agent": "StreamlitDashboard"})
         with urllib.request.urlopen(req, timeout=1.0) as resp:
             return resp.status == 200
     except Exception:
         return False
 
+api_base_str = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 api_online = check_api_status()
-api_status_str = "🟢 FastAPI Server Online (http://127.0.0.1:8000)" if api_online else "⚪ FastAPI Server Offline (Launch: `uvicorn api.main:app --reload`)"
+api_status_str = f"🟢 FastAPI Server Online ({api_base_str})" if api_online else "⚪ FastAPI Server Offline (Launch: `uvicorn api.main:app --reload`)"
 
 # Champion Highlight Banner & Target Leakage Notice
 st.info(
@@ -211,25 +237,25 @@ with plot_tab1:
         )
         st.plotly_chart(fig_fi, use_container_width=True)
     elif os.path.exists("reports/plots/feature_importance.png"):
-        st.image("reports/plots/feature_importance.png", caption="Feature Importance Chart", use_column_width=True)
+        st.image("reports/plots/feature_importance.png", caption="Feature Importance Chart", use_container_width=True)
     else:
         st.info("Feature importance data loading...")
 
 with plot_tab2:
     if os.path.exists("reports/plots/confusion_matrix.png"):
-        st.image("reports/plots/confusion_matrix.png", caption="Confusion Matrix — Champion Model", use_column_width=True)
+        st.image("reports/plots/confusion_matrix.png", caption="Confusion Matrix — Champion Model", use_container_width=True)
     else:
         st.info("Confusion matrix image not found (`reports/plots/confusion_matrix.png`).")
 
 with plot_tab3:
     if os.path.exists("reports/plots/roc_curve.png"):
-        st.image("reports/plots/roc_curve.png", caption="Receiver Operating Characteristic (ROC) Curve", use_column_width=True)
+        st.image("reports/plots/roc_curve.png", caption="Receiver Operating Characteristic (ROC) Curve", use_container_width=True)
     else:
         st.info("ROC curve image not found (`reports/plots/roc_curve.png`).")
 
 with plot_tab4:
     if os.path.exists("reports/plots/precision_recall_curve.png"):
-        st.image("reports/plots/precision_recall_curve.png", caption="Precision-Recall Curve", use_column_width=True)
+        st.image("reports/plots/precision_recall_curve.png", caption="Precision-Recall Curve", use_container_width=True)
     else:
         st.info("Precision-Recall curve image not found (`reports/plots/precision_recall_curve.png`).")
 
@@ -241,7 +267,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 st.markdown("### 📊 Customer Population & Segmentation Analytics")
 
-df_plot = filtered_features if not filtered_features.empty else features_df
+df_plot = filtered_features
 
 chart_col1, chart_col2 = st.columns(2)
 

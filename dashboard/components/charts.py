@@ -3,6 +3,8 @@ Plotly Chart Builders for RetailSense-AI Streamlit Dashboard.
 Provides reusable dark-themed BI visualizations.
 """
 
+from PIL import GifImagePlugin
+from PIL import GifImagePlugin
 from typing import Dict, Any, Optional
 import pandas as pd
 import numpy as np
@@ -68,18 +70,23 @@ def plot_monthly_revenue_trend(df: pd.DataFrame) -> go.Figure:
             mode="lines+markers",
             name="Revenue",
             line=dict(color="#6366f1", width=3, shape="spline"),
-            marker=dict(size=7, color="#818cf8", borderwidth=2, bordercolor="#ffffff"),
+            marker=dict(
+                    size=7,
+                color="#818cf8",
+                line=dict(width=2, color="#ffffff")
+            ),
             fill="tozeroy",
             fillcolor="rgba(99, 102, 241, 0.15)",
             hovertemplate="<b>Period:</b> %{x}<br><b>Revenue:</b> $%{y:,.2f}<extra></extra>"
         )
     )
     fig.update_layout(
-        title=dict(text="📈 Monthly Revenue Trend", font=dict(size=16, color="#f8fafc")),
-        xaxis_title="Period",
-        yaxis_title="Revenue ($)",
-        **DARK_LAYOUT
+    title=dict(text="📈 Monthly Revenue Trend", font=dict(size=16, color="#f8fafc")),
+    xaxis_title="Period",
+    yaxis_title="Revenue ($)",
+    **DARK_LAYOUT
     )
+    fig.update_xaxes(type="category")
     return fig
 
 
@@ -87,9 +94,15 @@ def plot_monthly_orders(df: pd.DataFrame) -> go.Figure:
     """Monthly Orders Bar Chart."""
     if df is None or df.empty:
         return go.Figure()
+    if "year_month" in df.columns and "orders" in df.columns:
+        df_orders = df[["year_month", "orders"]].copy()
+        df_orders.columns = ["period", "orders"]
 
     inv_col = "invoice_no" if "invoice_no" in df.columns else ("invoice" if "invoice" in df.columns else None)
-    if "year_month" in df.columns and inv_col:
+    if "year_month" in df.columns and "orders" in df.columns:
+        df_orders = df[["year_month", "orders"]].copy()
+        df_orders.columns = ["period", "orders"]
+    elif "year_month" in df.columns and inv_col:
         df_orders = df.groupby("year_month")[inv_col].nunique().reset_index()
         df_orders.columns = ["period", "orders"]
     elif "year" in df.columns and "total_orders" in df.columns:
@@ -114,10 +127,11 @@ def plot_monthly_orders(df: pd.DataFrame) -> go.Figure:
         marker_line_width=1
     )
     fig.update_layout(
-        xaxis_title="Period",
-        yaxis_title="Total Orders",
-        **DARK_LAYOUT
+    xaxis_title="Period",
+    yaxis_title="Total Orders",
+    **DARK_LAYOUT
     )
+    fig.update_xaxes(type="category")
     return fig
 
 
@@ -155,6 +169,7 @@ def plot_revenue_growth(df: pd.DataFrame) -> go.Figure:
         yaxis_title="Growth (%)",
         **DARK_LAYOUT
     )
+    fig.update_xaxes(type="category")
     return fig
 
 
@@ -200,7 +215,7 @@ def plot_revenue_by_hour(df: pd.DataFrame) -> go.Figure:
     )
     fig.update_traces(hovertemplate="<b>Hour:</b> %{x}:00<br><b>Revenue:</b> $%{y:,.2f}<extra></extra>")
     fig.update_layout(
-        xaxis=dict(tickmode="linear", tick0=0, dtick=1),
+        xaxis_tickmode="linear",
         xaxis_title="Hour of Day (24h)",
         yaxis_title="Revenue ($)",
         **DARK_LAYOUT
@@ -246,6 +261,7 @@ def plot_moving_average_revenue(df: pd.DataFrame, window: int = 3) -> go.Figure:
         yaxis_title="Revenue ($)",
         **DARK_LAYOUT
     )
+    fig.update_xaxes(type="category")
     return fig
 
 
@@ -380,11 +396,11 @@ def plot_pareto_chart(df: pd.DataFrame) -> go.Figure:
     )
     fig.update_layout(
         title=dict(text="📊 Pareto Product Analysis (Cumulative Revenue %)", font=dict(size=16, color="#f8fafc")),
-        xaxis=dict(title="Products (Top 20)", tickangle=-45),
-        yaxis=dict(title="Revenue ($)"),
         yaxis2=dict(title="Cumulative Revenue %", overlaying="y", side="right", range=[0, 105]),
         **DARK_LAYOUT
     )
+    fig.update_xaxes(title="Products (Top 20)", tickangle=-45)
+    fig.update_yaxes(title="Revenue ($)")
     return fig
 
 
@@ -739,19 +755,32 @@ def plot_pipeline_timeline() -> go.Figure:
 
     df_tasks = pd.DataFrame(tasks)
 
-    fig = px.timeline(
-        df_tasks,
-        x_start="Start",
-        x_end="Finish",
-        y="Task",
-        color="Status",
-        color_discrete_map={"Success": "#10b981"},
-        title="⏱️ Airflow Task Execution Sequence (Seconds)"
+    df_tasks["Duration"] = df_tasks["Finish"] - df_tasks["Start"]
+    fig = go.Figure()
+    fig.add_trace(
+        go.Bar(
+            y=df_tasks["Task"],
+            x=df_tasks["Duration"],
+            base=df_tasks["Start"],
+            orientation="h",
+            name="Success",
+            marker_color="#10b981",
+            hovertemplate=(
+                "<b>%{y}</b><br>"
+                "Start: %{base}s<br>"
+                "Duration: %{x}s"
+                "<extra></extra>"
+            ),
+        )
     )
+
     fig.update_yaxes(autorange="reversed")
+
     fig.update_layout(
+        title="⏱️ Airflow Task Execution Sequence (Seconds)",
         xaxis_title="Execution Timeline (s)",
         yaxis_title="DAG Task",
+        showlegend=False,
         **DARK_LAYOUT
     )
     return fig

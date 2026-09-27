@@ -188,6 +188,110 @@ def apply_global_filters(df: pd.DataFrame, filters: Dict[str, Any]) -> pd.DataFr
 
     return filtered_df
 
+@st.cache_data(ttl=3600)
+def prepare_sales_aggregations(
+    df: pd.DataFrame,
+    country: str,
+    years: tuple,
+    months: tuple
+) -> Dict[str, pd.DataFrame]:
+    """
+    Filters the processed dataset once and prepares compact datasets
+    for Sales page visualizations.
+
+    This avoids repeatedly grouping the full processed dataset
+    independently for every chart.
+    """
+    if df is None or df.empty:
+        return {
+            "filtered": pd.DataFrame(),
+            "monthly": pd.DataFrame(),
+            "weekday": pd.DataFrame(),
+            "hour": pd.DataFrame(),
+        }
+
+    # Apply filters once
+    filtered = df
+
+    if country and country != "All Countries" and "country" in filtered.columns:
+        filtered = filtered[filtered["country"] == country]
+
+    if years and "year" in filtered.columns:
+        filtered = filtered[filtered["year"].isin(years)]
+
+    if months and "month" in filtered.columns:
+        filtered = filtered[filtered["month"].isin(months)]
+
+    # Monthly revenue
+    if "year_month" in filtered.columns and "total_price" in filtered.columns:
+        monthly = (
+            filtered.groupby("year_month")["total_price"]
+            .sum()
+            .reset_index()
+            .sort_values("year_month")
+        )
+    else:
+        monthly = pd.DataFrame()
+
+    # Monthly orders
+    if "year_month" in filtered.columns:
+        inv_col = (
+            "invoice_no"
+            if "invoice_no" in filtered.columns
+            else ("invoice" if "invoice" in filtered.columns else None)
+        )
+
+        if inv_col:
+            monthly_orders = (
+                filtered.groupby("year_month")[inv_col]
+                .nunique()
+                .reset_index(name="orders")
+            )
+        else:
+            monthly_orders = pd.DataFrame()
+    else:
+        monthly_orders = pd.DataFrame()
+
+    # Weekday revenue
+    if "weekday" in filtered.columns and "total_price" in filtered.columns:
+        days_order = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
+
+        weekday = (
+            filtered.groupby("weekday")["total_price"]
+            .sum()
+            .reindex(days_order)
+            .dropna()
+            .reset_index()
+        )
+    else:
+        weekday = pd.DataFrame()
+
+    # Hourly revenue
+    if "hour" in filtered.columns and "total_price" in filtered.columns:
+        hour = (
+            filtered.groupby("hour")["total_price"]
+            .sum()
+            .reset_index()
+            .sort_values("hour")
+        )
+    else:
+        hour = pd.DataFrame()
+
+    return {
+        "filtered": filtered,
+        "monthly": monthly,
+        "monthly_orders": monthly_orders,
+        "weekday": weekday,
+        "hour": hour,
+    }
 
 def get_filtered_metrics(datasets: Dict[str, pd.DataFrame], filters: Dict[str, Any]) -> Dict[str, Any]:
     """

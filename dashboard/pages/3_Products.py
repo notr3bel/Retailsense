@@ -38,6 +38,22 @@ df_prod = datasets.get("products")
 df_proc = datasets.get("processed")
 df_filtered = apply_global_filters(df_proc, filters) if df_proc is not None else None
 
+# Add product category information to the filtered transaction data.
+# Category is available in the Gold products dataset, not final_dataset.csv.
+df_filtered_product = df_filtered
+
+if df_filtered is not None and df_prod is not None:
+    product_categories = (
+        df_prod[["stock_code", "category"]]
+        .drop_duplicates("stock_code")
+    )
+
+    df_filtered_product = df_filtered.merge(
+        product_categories,
+        on="stock_code",
+        how="left"
+    )
+
 # Top Bar Export
 top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
@@ -62,11 +78,15 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Row 2: Revenue by Category & Category Distribution Donut
 col3, col4 = st.columns(2)
 with col3:
-    fig_cat_rev = plot_revenue_by_category(df_prod if df_prod is not None else df_filtered)
+    fig_cat_rev = plot_revenue_by_category(
+        df_filtered_product if df_filtered_product is not None else df_prod
+    )
     st.plotly_chart(fig_cat_rev, use_container_width=True)
 
 with col4:
-    fig_cat_donut = plot_category_distribution(df_prod if df_prod is not None else df_filtered)
+    fig_cat_donut = plot_category_distribution(
+        df_filtered_product if df_filtered_product is not None else df_prod
+    )
     st.plotly_chart(fig_cat_donut, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -74,5 +94,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Row 3: Pareto Analysis Chart
 st.markdown("### 📊 Pareto Product Analysis (80/20 Revenue Rule)")
 st.caption("Identifies the top products driving 80% of cumulative retail revenue.")
-fig_pareto = plot_pareto_chart(df_prod if df_prod is not None else df_filtered)
+fig_pareto = plot_pareto_chart(
+    df_filtered_product if df_filtered_product is not None else df_prod
+)
 st.plotly_chart(fig_pareto, use_container_width=True)

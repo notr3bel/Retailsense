@@ -38,13 +38,34 @@ df_country = datasets.get("country_summary")
 df_proc = datasets.get("processed")
 df_filtered = apply_global_filters(df_proc, filters) if df_proc is not None else None
 
+# Build a country summary from the filtered transaction data.
+# The Gold country_summary dataset is unfiltered, so we must
+# recompute these metrics when dashboard filters are active.
+if df_filtered is not None and not df_filtered.empty:
+    df_country_filtered = (
+        df_filtered.groupby("country")
+        .agg(
+            customers=("customer_id", "nunique"),
+            total_orders=("invoice_no", "nunique"),
+            total_quantity=("quantity", "sum"),
+            total_revenue=("total_price", "sum")
+        )
+        .reset_index()
+    )
+else:
+    df_country_filtered = df_country
+
 # Top Bar Export
 top_col1, top_col2 = st.columns([3, 1])
 with top_col1:
-    num_c = df_country['country'].nunique() if df_country is not None else 0
+    num_c = df_country_filtered["country"].nunique() if df_country_filtered is not None else 0
     st.write(f"Global retail footprint across **{num_c} international markets**.")
 with top_col2:
-    render_download_button(df_country if df_country is not None else df_filtered, "country_summary.csv", "📥 Download Country CSV")
+    render_download_button(
+    df_country_filtered if df_country_filtered is not None else df_filtered,
+    "country_summary.csv",
+    "📥 Download Country CSV"
+)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -75,8 +96,11 @@ with col3:
 
 with col4:
     st.markdown("### 📋 Top International Markets Breakdown")
-    if df_country is not None and not df_country.empty:
-        df_display = df_country.sort_values("total_revenue", ascending=False).head(10).copy()
+    if df_country_filtered is not None and not df_country_filtered.empty:
+        df_display = df_country_filtered.sort_values(
+            "total_revenue",
+            ascending=False
+        ).head(10).copy()
         df_display["total_revenue"] = df_display["total_revenue"].apply(lambda x: f"${x:,.2f}")
         df_display["total_orders"] = df_display["total_orders"].apply(lambda x: f"{x:,}")
         df_display["total_quantity"] = df_display["total_quantity"].apply(lambda x: f"{x:,}")

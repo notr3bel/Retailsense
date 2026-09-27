@@ -30,11 +30,11 @@ def get_db_url(use_sqlite_fallback: bool = False) -> str:
         sqlite_path = os.path.abspath("database/retailsense_dw.db")
         return f"sqlite:///{sqlite_path}"
 
-    user = os.getenv("DB_USER", "postgres")
-    password = os.getenv("DB_PASSWORD", "postgres")
-    host = os.getenv("DB_HOST", "localhost")
-    port = os.getenv("DB_PORT", "5432")
-    db_name = os.getenv("DB_NAME", "retailsense_db")
+    user = os.getenv("POSTGRES_USER") or os.getenv("DB_USER", "postgres")
+    password = os.getenv("POSTGRES_PASSWORD") or os.getenv("DB_PASSWORD", "postgres")
+    host = os.getenv("POSTGRES_HOST") or os.getenv("DB_HOST", "localhost")
+    port = os.getenv("POSTGRES_PORT") or os.getenv("DB_PORT", "5432")
+    db_name = os.getenv("POSTGRES_DB") or os.getenv("DB_NAME", "retailsense_db")
 
     return f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
 

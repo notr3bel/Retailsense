@@ -50,11 +50,11 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Row 1: Top Customers & Repeat vs New
 col1, col2 = st.columns(2)
 with col1:
-    fig_top_c = plot_top_customers(df_cust if df_cust is not None else df_filtered, top_n=10)
+    fig_top_c = plot_top_customers(df_filtered if df_filtered is not None else df_cust, top_n=10)
     st.plotly_chart(fig_top_c, use_container_width=True)
 
 with col2:
-    fig_repeat = plot_repeat_vs_new(df_cust if df_cust is not None else df_filtered)
+    fig_repeat = plot_repeat_vs_new(df_filtered if df_filtered is not None else df_cust)
     st.plotly_chart(fig_repeat, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -62,11 +62,11 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Row 2: Customer Lifetime Value (CLV) & Average Basket Size
 col3, col4 = st.columns(2)
 with col3:
-    fig_clv = plot_clv_distribution(df_cust if df_cust is not None else df_filtered)
+    fig_clv = plot_clv_distribution(df_filtered if df_filtered is not None else df_cust)
     st.plotly_chart(fig_clv, use_container_width=True)
 
 with col4:
-    fig_basket = plot_avg_basket_size(df_cust if df_cust is not None else df_filtered)
+    fig_basket = plot_avg_basket_size(df_filtered if df_filtered is not None else df_cust)
     st.plotly_chart(fig_basket, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -74,5 +74,5 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Row 3: RFM Segmentation Scatter Summary
 st.markdown("### 🎯 RFM Segmentation (Frequency vs Monetary Value)")
 st.caption("Maps customers based on order frequency and lifetime spend to identify VIP vs At-Risk segments.")
-fig_rfm = plot_rfm_summary(df_cust if df_cust is not None else df_filtered)
+fig_rfm = plot_rfm_summary(df_filtered if df_filtered is not None else df_cust)
 st.plotly_chart(fig_rfm, use_container_width=True)
